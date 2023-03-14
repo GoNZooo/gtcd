@@ -1,0 +1,12 @@
+# Elixir
+deps
+_build
+.elixir_ls
+
+# Erlang
+ebin
+*.dump
+
+# PureScript
+.spago
+output
