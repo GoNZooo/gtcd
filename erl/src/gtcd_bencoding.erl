@@ -1,14 +1,14 @@
--module(bencoding).
+-module(gtcd_bencoding).
 
 -export([encode/1, decode/1]).
 
 encode(Value) when is_binary(Value); is_integer(Value); is_list(Value); is_map(Value) ->
-  {ok, bencoding_encoding:encode(Value)};
+  {ok, gtcd_bencoding_encoding:encode(Value)};
 encode(Other) ->
   {error, {invalid_bencoding_value, type_of(Other)}}.
 
 decode(Value) when is_binary(Value) ->
-  bencoding_decoding:decode(Value);
+  gtcd_bencoding_decoding:decode(Value);
 decode(Other) ->
   {error, {invalid_bencoding_value, type_of(Other)}}.
 

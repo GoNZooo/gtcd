@@ -1,9 +1,9 @@
-defmodule SzTorrent.MixProject do
+defmodule Gtcd.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :sz_torrent,
+      app: :gtcd,
       version: "0.1.0",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
@@ -17,7 +17,7 @@ defmodule SzTorrent.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      mod: {:szTorrent_application@ps, []},
+      mod: {:gtcd_application@ps, []},
       extra_applications: [:logger]
     ]
   end

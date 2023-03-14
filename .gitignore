@@ -10,3 +10,4 @@ ebin
 # PureScript
 .spago
 output
+.psc-ide-port

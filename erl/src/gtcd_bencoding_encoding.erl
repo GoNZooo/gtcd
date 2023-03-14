@@ -1,4 +1,4 @@
--module(bencoding_encoding).
+-module(gtcd_bencoding_encoding).
 
 -export([encode/1]).
 
