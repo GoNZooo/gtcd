@@ -13,7 +13,14 @@ announce(Url,
            event := _Event} =
            Parameters) ->
   UrlWithQuery = construct_url(Url, Parameters),
-  httpc:request(get, {UrlWithQuery, []}, [], []).
+  case httpc:request(get, {UrlWithQuery, []}, [], []) of
+    {ok, {_HttpData, _Headers, Body}} when is_list(Body) ->
+      gtcd_bencoding_decoding:decode(list_to_binary(Body));
+    {ok, {_HttpData, _Headers, Body}} when is_binary(Body) ->
+      gtcd_bencoding_decoding:decode(Body);
+    {error, Reason} ->
+      {error, Reason}
+  end.
 
 construct_url(Url,
               #{info_hash := InfoHash,
