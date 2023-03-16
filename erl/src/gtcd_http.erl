@@ -13,13 +13,23 @@ announce(Url,
            event := _Event} =
            Parameters) ->
   UrlWithQuery = construct_url(Url, Parameters),
-  case httpc:request(get, {UrlWithQuery, []}, [], []) of
-    {ok, {_HttpData, _Headers, Body}} when is_list(Body) ->
-      gtcd_bencoding_decoding:decode(list_to_binary(Body));
-    {ok, {_HttpData, _Headers, Body}} when is_binary(Body) ->
-      gtcd_bencoding_decoding:decode(Body);
-    {error, Reason} ->
-      {error, Reason}
+  Result =
+    case httpc:request(get, {UrlWithQuery, []}, [], []) of
+      {ok, {_HttpData, _Headers, Body}} when is_list(Body) ->
+        gtcd_bencoding_decoding:decode(list_to_binary(Body));
+      {ok, {_HttpData, _Headers, Body}} when is_binary(Body) ->
+        gtcd_bencoding_decoding:decode(Body);
+      {error, HttpReason0} ->
+        {error, HttpReason0}
+    end,
+  % @TODO: This only handles the compact form of the `peers` value
+  case Result of
+    {ok, #{value := #{<<"failure reason">> := FailureReason}}} ->
+      {error, {announce_error, FailureReason}};
+    {ok, #{value := #{<<"peers">> := PeersBinary, <<"interval">> := Interval}}} ->
+      {ok, #{peers => parse_peers(PeersBinary), interval => Interval}};
+    {error, HttpReason} ->
+      {error, {http_error, HttpReason}}
   end.
 
 construct_url(Url,
@@ -62,3 +72,12 @@ add_to_query(#{query := Query0} = ParsedUri, Parameters) ->
                 Query0,
                 Parameters),
   ParsedUri#{query => Query}.
+
+parse_peers(PeersBinary) ->
+  parse_peers(PeersBinary, []).
+
+parse_peers(<<>>, Peers) ->
+  Peers;
+parse_peers(<<Ip0:8, Ip1:8, Ip2:8, Ip3:8, Port:16, Rest/binary>>, Peers) ->
+  Ip = {Ip0, Ip1, Ip2, Ip3},
+  parse_peers(Rest, [{Ip, Port} | Peers]).
