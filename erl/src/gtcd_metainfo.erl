@@ -38,7 +38,7 @@ create(#{<<"info">> :=
       length => Length,
       name => FileName,
       piece_length => PieceLength,
-      pieces => Pieces,
+      pieces => parse_pieces(Pieces),
       info_hash => InfoHash}}};
 % Directory metainfo
 create(#{<<"info">> :=
@@ -54,13 +54,21 @@ create(#{<<"info">> :=
       files => create_files_object(Files),
       name => DirectoryName,
       piece_length => PieceLength,
-      pieces => Pieces,
+      pieces => parse_pieces(Pieces),
       info_hash => InfoHash}}}.
 
 get_announce_url(#{<<"announce">> := Announce}) ->
   [Announce];
 get_announce_url(#{<<"url-list">> := UrlList}) ->
   UrlList.
+
+parse_pieces(PiecesBinary) when byte_size(PiecesBinary) rem 20 == 0 ->
+  parse_pieces(PiecesBinary, []).
+
+parse_pieces(<<>>, Pieces) ->
+  lists:reverse(Pieces);
+parse_pieces(<<Hash:20/bytes, Rest/binary>>, Pieces) ->
+  parse_pieces(Rest, [Hash | Pieces]).
 
 create_files_object(Files) ->
   lists:map(fun create_file_object/1, Files).
