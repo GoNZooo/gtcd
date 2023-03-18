@@ -49,6 +49,7 @@ create_common_metainfo(#{<<"info">> :=
                          Data,
                        InfoHash) ->
   Announce = get_announce_url(Data),
+  AdditionalData = get_additional_data(Data),
   case parse_pieces(PiecesBinary) of
     {ok, Pieces} ->
       {ok,
@@ -56,7 +57,8 @@ create_common_metainfo(#{<<"info">> :=
          name => Name,
          piece_length => PieceLength,
          pieces => Pieces,
-         info_hash => InfoHash}};
+         info_hash => InfoHash,
+         additional_data => AdditionalData}};
     {error, Reason} ->
       {error, Reason}
   end.
@@ -81,6 +83,10 @@ create_files_object(Files) ->
 
 create_file_object(#{<<"length">> := Length, <<"path">> := Path}) ->
   #{length => Length, path => Path}.
+
+get_additional_data(Data) ->
+  KeysToNotGet = [<<"announce">>, <<"info">>],
+  maps:without(KeysToNotGet, Data).
 
 hash_metainfo_object(Binary) ->
   crypto:hash(sha, Binary).
