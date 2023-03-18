@@ -25,37 +25,41 @@ parse_torrent_data(Data) ->
   end.
 
 % File metainfo
-create(#{<<"info">> :=
-           #{<<"length">> := Length,
-             <<"name">> := FileName,
-             <<"piece length">> := PieceLength,
-             <<"pieces">> := Pieces}} =
-         Data,
-       InfoHash) ->
-  {ok,
-   {file_metainfo,
-    #{announce => get_announce_url(Data),
-      length => Length,
-      name => FileName,
-      piece_length => PieceLength,
-      pieces => parse_pieces(Pieces),
-      info_hash => InfoHash}}};
+create(#{<<"info">> := #{<<"length">> := Length}} = Data, InfoHash) ->
+  case create_common_metainfo(Data, InfoHash) of
+    {ok, MetaInfo} ->
+      {ok, {file_metainfo, MetaInfo#{length => Length}}};
+    {error, Reason} ->
+      {error, Reason}
+  end;
 % Directory metainfo
-create(#{<<"info">> :=
-           #{<<"files">> := Files,
-             <<"name">> := DirectoryName,
-             <<"piece length">> := PieceLength,
-             <<"pieces">> := Pieces}} =
-         Data,
-       InfoHash) ->
-  {ok,
-   {directory_metainfo,
-    #{announce => get_announce_url(Data),
-      files => create_files_object(Files),
-      name => DirectoryName,
-      piece_length => PieceLength,
-      pieces => parse_pieces(Pieces),
-      info_hash => InfoHash}}}.
+create(#{<<"info">> := #{<<"files">> := Files0}} = Data, InfoHash) ->
+  Files = create_files_object(Files0),
+  case create_common_metainfo(Data, InfoHash) of
+    {ok, MetaInfo} ->
+      {ok, {directory_metainfo, MetaInfo#{files => Files}}};
+    {error, Reason} ->
+      {error, Reason}
+  end.
+
+create_common_metainfo(#{<<"info">> :=
+                           #{<<"name">> := Name,
+                             <<"piece length">> := PieceLength,
+                             <<"pieces">> := PiecesBinary}} =
+                         Data,
+                       InfoHash) ->
+  Announce = get_announce_url(Data),
+  case parse_pieces(PiecesBinary) of
+    {ok, Pieces} ->
+      {ok,
+       #{announce => Announce,
+         name => Name,
+         piece_length => PieceLength,
+         pieces => Pieces,
+         info_hash => InfoHash}};
+    {error, Reason} ->
+      {error, Reason}
+  end.
 
 get_announce_url(#{<<"announce">> := Announce}) ->
   [Announce];
@@ -63,7 +67,9 @@ get_announce_url(#{<<"url-list">> := UrlList}) ->
   UrlList.
 
 parse_pieces(PiecesBinary) when byte_size(PiecesBinary) rem 20 == 0 ->
-  parse_pieces(PiecesBinary, []).
+  {ok, parse_pieces(PiecesBinary, [])};
+parse_pieces(PiecesBinary) ->
+  {error, {pieces_not_divisible_by_20, byte_size(PiecesBinary)}}.
 
 parse_pieces(<<>>, Pieces) ->
   lists:reverse(Pieces);
