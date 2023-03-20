@@ -13,7 +13,7 @@ import Control.Monad.Reader.Class (ask)
 import Control.Monad.Reader.Trans (ReaderT)
 import Control.Monad.Trans.Class (lift)
 import Data.Array as Array
-import Data.Either (Either(..))
+import Data.Either (Either)
 import Data.Int as Int
 import Data.List.Lazy (replicateM)
 import Data.Maybe (Maybe(..))
@@ -44,9 +44,7 @@ runParserM ma input = do
   sourceRef <- Ref.new ""
   parseResult <- runReaderT (runParserT input ma) sourceRef
   source <- Ref.read sourceRef
-  pure $ case parseResult of
-    Left err -> Left err
-    Right result -> Right { result, source }
+  pure $ map (\result -> { result, source }) parseResult
 
 class BEncoding a where
   encode :: a -> String
