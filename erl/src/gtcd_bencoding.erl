@@ -42,4 +42,3 @@ type_of(Value) when is_bitstring(Value) ->
   bitstring;
 type_of(_Value) ->
   unknown.
-
