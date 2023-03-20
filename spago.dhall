@@ -48,6 +48,7 @@ to generate this file without the comments in this block.
   , "prelude"
   , "quickcheck"
   , "record"
+  , "refs"
   , "simple-json"
   , "simple-json-generics"
   , "strings"
