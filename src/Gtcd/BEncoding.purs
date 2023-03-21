@@ -88,7 +88,11 @@ integerP = do
   sign <- char '-' *> pure (-1) <|> pure 1
   digits <- many1 digit
   let
-    asString = digits # map String.codePointFromChar # Array.fromFoldable # String.fromCodePointArray
+    asString =
+      digits
+        # map String.codePointFromChar
+        # Array.fromFoldable
+        # String.fromCodePointArray
   case Int.fromString asString of
     Just x -> pure (sign * x)
     Nothing -> fail $ "Invalid integer: " <> asString
