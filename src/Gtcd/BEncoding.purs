@@ -50,7 +50,6 @@ import Text.Parsing.Parser (ParseError, ParserT, fail, runParserT)
 import Text.Parsing.Parser.Combinators (choice, many1)
 import Text.Parsing.Parser.String as StringParsing
 import Text.Parsing.Parser.Token as Token
-import Unsafe.Coerce as UnsafeCoerce
 
 type ParserM a = ParserT String (ReaderT (Ref String) Effect) a
 
@@ -124,7 +123,6 @@ parseTorrentFile path = Except.runExceptT do
   -- Console.log $ "infoMapBinary: " <> show infoMapBinary
   parseResult :: (ParseResult InfoMap) <-
     infoMapBinary # runParserM parser # map (lmap TorrentParsingError) # ExceptT
-  Console.log $ "parseResult: " <> show parseResult
   pure parseResult
 
 runParserM
@@ -303,27 +301,12 @@ addSource s = do
 
 stringOfLength :: Int -> ParserM String
 stringOfLength length = do
-  lift $ Console.log $ Array.fold [ "stringOfLength: ", show length ]
   (Array.fromFoldable >>> map String.codePointFromChar >>> String.fromCodePointArray) <$>
     replicateM length byte
 
 byte :: ParserM Char
 byte = do
-  lift $ Console.log "byte"
-  source <- lift ask
-  position <- source # Ref.read # lift # lift
-  lift $ Console.log $ "position: " <> show position
   c <- StringParsing.satisfy (const true)
-  addSource (CodeUnits.singleton c)
-  pure c
-
-anyChar :: ParserM Char
-anyChar = do
-  lift $ Console.log "anyChar"
-  source <- lift ask
-  position <- source # Ref.read # lift # lift
-  lift $ Console.log $ "position: " <> show position
-  c <- StringParsing.anyChar
   addSource (CodeUnits.singleton c)
   pure c
 
