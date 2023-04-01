@@ -1,4 +1,4 @@
-module Pinto.Supervisor.Helpers
+module Gtcd.Supervisor.Helpers
   ( supervisor
   , worker
   ) where

@@ -1,4 +1,4 @@
-module Pinto.GenServer.Helpers
+module Gtcd.GenServer.Helpers
   ( exit
   ) where
 

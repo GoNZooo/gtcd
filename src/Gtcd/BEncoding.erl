@@ -1,15 +1,16 @@
--module(gtcd_bencoding_decoding).
+-module(gtcd_bEncoding@foreign).
 
--export([decode/1, get_info_map/1]).
+-export([findInfoMap/1]).
 
--type parse_payload() ::
-  #{value := term(),
-    rest := binary(),
-    source := binary()}.
+findInfoMap(Binary) ->
+  case get_info_map(Binary) of
+    {ok, #{source := Source}} ->
+      io_lib:format("Found source: ~p", [Source]),
+      {just, Source};
+    _ ->
+      {nothing}
+  end.
 
--spec get_info_map(TorrentFile) -> Result
-  when TorrentFile :: binary(),
-       Result :: {ok, parse_payload()} | {error, invalid_info_map}.
 get_info_map(<<>>) ->
   {error, no_info_map};
 get_info_map(<<"4:infod", Rest/binary>>) ->
@@ -20,36 +21,8 @@ get_info_map(<<"4:infod", Rest/binary>>) ->
       {error, invalid_info_map}
   end;
 get_info_map(<<_X, Rest/binary>>) ->
+  io_lib:format("Skipping ~p", [_X]),
   get_info_map(Rest).
-
-decode(<<"i", Rest/binary>>) ->
-  case decode_integer(Rest) of
-    {parsed, Payload} ->
-      {ok, Payload};
-    {parse_error, invalid} ->
-      {error, invalid_integer}
-  end;
-decode(<<"l", Rest/binary>>) ->
-  case decode_list(Rest) of
-    {parsed, Payload} ->
-      {ok, Payload};
-    {parse_error, invalid} ->
-      {error, invalid_list}
-  end;
-decode(<<"d", Rest/binary>>) ->
-  case decode_map(Rest) of
-    {parsed, Payload} ->
-      {ok, Payload};
-    {parse_error, invalid} ->
-      {error, invalid_map}
-  end;
-decode(Binary) ->
-  case decode_string(Binary) of
-    {parsed, Payload} ->
-      {ok, Payload};
-    {parse_error, invalid} ->
-      {error, invalid_string}
-  end.
 
 decode_integer(Binary) ->
   case binary:split(Binary, <<"e">>, []) of
@@ -125,4 +98,33 @@ decode_map(Binary, Acc, Source) ->
       end;
     {error, _} ->
       {parse_error, invalid}
+  end.
+
+decode(<<"i", Rest/binary>>) ->
+  case decode_integer(Rest) of
+    {parsed, Payload} ->
+      {ok, Payload};
+    {parse_error, invalid} ->
+      {error, invalid_integer}
+  end;
+decode(<<"l", Rest/binary>>) ->
+  case decode_list(Rest) of
+    {parsed, Payload} ->
+      {ok, Payload};
+    {parse_error, invalid} ->
+      {error, invalid_list}
+  end;
+decode(<<"d", Rest/binary>>) ->
+  case decode_map(Rest) of
+    {parsed, Payload} ->
+      {ok, Payload};
+    {parse_error, invalid} ->
+      {error, invalid_map}
+  end;
+decode(Binary) ->
+  case decode_string(Binary) of
+    {parsed, Payload} ->
+      {ok, Payload};
+    {parse_error, invalid} ->
+      {error, invalid_string}
   end.

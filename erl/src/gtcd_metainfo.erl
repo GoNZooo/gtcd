@@ -27,8 +27,9 @@ parse_torrent_data(Data) ->
 % File metainfo
 create(#{<<"info">> := #{<<"length">> := Length}} = Data, InfoHash) ->
   case create_common_metainfo(Data, InfoHash) of
-    {ok, MetaInfo} ->
-      {ok, {file_metainfo, MetaInfo#{length => Length}}};
+    {ok, #{info := Info} = MetaInfo} ->
+      NewInfo = Info#{length => Length},
+      {ok, {file_metainfo, MetaInfo#{info => NewInfo}}};
     {error, Reason} ->
       {error, Reason}
   end;
@@ -36,8 +37,9 @@ create(#{<<"info">> := #{<<"length">> := Length}} = Data, InfoHash) ->
 create(#{<<"info">> := #{<<"files">> := Files0}} = Data, InfoHash) ->
   Files = create_files_object(Files0),
   case create_common_metainfo(Data, InfoHash) of
-    {ok, MetaInfo} ->
-      {ok, {directory_metainfo, MetaInfo#{files => Files}}};
+    {ok, #{info := Info} = MetaInfo} ->
+      NewInfo = Info#{files => Files},
+      {ok, {directory_metainfo, MetaInfo#{info => NewInfo}}};
     {error, Reason} ->
       {error, Reason}
   end.
@@ -54,9 +56,10 @@ create_common_metainfo(#{<<"info">> :=
     {ok, Pieces} ->
       {ok,
        #{announce => Announce,
-         name => Name,
-         piece_length => PieceLength,
-         pieces => Pieces,
+         info =>
+           #{name => Name,
+             piece_length => PieceLength,
+             pieces => Pieces},
          info_hash => InfoHash,
          additional_data => AdditionalData}};
     {error, Reason} ->

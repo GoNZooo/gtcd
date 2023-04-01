@@ -29,7 +29,8 @@ defmodule Gtcd.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:purerlex, "~> 0.4.2"},
       {:jsx, "~> 3.1"},
-      {:gproc, "~> 0.9.0"}
+      {:gproc, "~> 0.9.0"},
+      {:purerl_test, "~> 0.1.2"}
     ]
   end
 end

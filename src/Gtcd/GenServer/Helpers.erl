@@ -1,4 +1,4 @@
--module(pinto_genServer_helpers@foreign).
+-module(gtcd_genServer_helpers@foreign).
 
 -export([exit_/2]).
 

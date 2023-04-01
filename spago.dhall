@@ -31,7 +31,6 @@ to generate this file without the comments in this block.
   , "erl-process"
   , "erl-quickcheck-helpers"
   , "erl-simplebus"
-  , "erl-test-eunit"
   , "erl-tuples"
   , "exceptions"
   , "foldable-traversable"
@@ -57,6 +56,7 @@ to generate this file without the comments in this block.
   , "typelevel-prelude"
   , "unicode"
   , "unsafe-coerce"
+  , "purerl-test"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
