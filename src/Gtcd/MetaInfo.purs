@@ -17,14 +17,6 @@ import Erl.Data.Map (Map)
 import Erl.Kernel.File (FileError)
 import Foreign (Foreign)
 
--- #{announce => Announce,
---   info =>
---     #{name => Name,
---       piece_length => PieceLength,
---       pieces => Pieces},
---   info_hash => InfoHash,
---   additional_data => AdditionalData}};
-
 type Torrent =
   { announce :: AnnounceData
   , info :: InfoMap

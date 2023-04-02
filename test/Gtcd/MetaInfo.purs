@@ -5,10 +5,10 @@ import Prelude
 import Data.Either (Either(..))
 import Effect.Class (liftEffect)
 import Erl.Data.List as List
-import Gtcd.MetaInfo (AnnounceData(..))
+import Gtcd.MetaInfo (AnnounceData(..), InfoMap(..))
 import Gtcd.MetaInfo as MetaInfo
 import Partial.Unsafe as UnsafePartial
-import PurerlTest (suite, test, assertEqual)
+import PurerlTest (assert, assertEqual, suite, test)
 import PurerlTest.Types (Suites)
 
 testSuite :: Suites
@@ -16,8 +16,16 @@ testSuite = do
   suite "BEncoding metainfo" do
     test "Reads metainfo correctly from test files" do
       let torrentPath = "priv/torrents/archlinux-2023.03.01-x86_64.iso.torrent"
-      { announce } <- liftEffect $ expectRight <$> MetaInfo.parseTorrentFile torrentPath
+      { announce, info_hash, info } <-
+        liftEffect $ expectRight <$> MetaInfo.parseTorrentFile torrentPath
       assertEqual announce archLinuxAnnounceList
+      assertEqual info_hash "6ebb0596f16e8dca6635921c5e125f293e4cecad"
+      case info of
+        FileInfoMap { length, pieceLength } -> do
+          assertEqual length 849686528
+          assertEqual pieceLength 524288
+        MultiFileInfoMap _other -> do
+          assert false
 
 expectRight :: forall l r. Either l r -> r
 expectRight (Right x) = x

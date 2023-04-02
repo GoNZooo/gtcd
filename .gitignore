@@ -11,3 +11,5 @@ ebin
 .spago
 output
 .psc-ide-port
+
+priv/torrents/*.torrent

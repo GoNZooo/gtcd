@@ -95,4 +95,4 @@ hash_metainfo_object(Binary) ->
   crypto:hash(sha, Binary).
 
 to_hex(Binary) ->
-  << <<(list_to_binary(io_lib:format("%~2.16.0B", [X])))/binary>> || <<X>> <= Binary >>.
+  << <<(list_to_binary(io_lib:format("~2.16.0b", [X])))/binary>> || <<X>> <= Binary >>.
